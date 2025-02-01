@@ -43,7 +43,7 @@ const dotenv = __importStar(require("dotenv"));
 dotenv.config();
 exports.default = (0, fastify_plugin_1.default)(async (fastify) => {
     // Only register Swagger in development environment
-    if (process.env.NODE_ENV == 'local') {
+    if (process.env.NODE_ENV == 'local' || 'production') {
         fastify.register(swagger_1.default, {
             openapi: {
                 info: {
@@ -53,7 +53,7 @@ exports.default = (0, fastify_plugin_1.default)(async (fastify) => {
                 },
                 servers: [
                     {
-                        url: `http://localhost:${process.env.PORT || 3000}`, // Default to port 3000 if PORT is not set
+                        url: process.env.NODE_ENV == "local" ? `http://localhost:${process.env.PORT || 3000}` : `${process.env.SWAGGER_URL}`,
                     },
                 ],
                 components: {
