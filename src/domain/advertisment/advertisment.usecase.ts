@@ -8,7 +8,6 @@ import {
   E_STATUS,
   UpdateInventoryType,
 } from '@/types';
-import { fileUpload } from '@/utils/file-upload.util';
 
 
 export const createAdvertismentUseCase = async (
@@ -160,3 +159,9 @@ export const getAdvertismentByIdUsecase = async (id: string) => {
     status: E_STATUS.ACTIVE, 
   });
 };
+
+export const incrementViewsUseCase = (advertismentId: string) =>
+  AdvertismentModel.findOneAndUpdate(
+    { advertismentId },
+    { $inc: { views: 1 } }, 
+  );

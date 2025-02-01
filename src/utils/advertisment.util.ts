@@ -123,10 +123,8 @@ if (Array.isArray(images)) {
 // Helper function to process form data and return the object excluding 'images'
 export const prepareAdvertisment = (body: AdvertismentTypeRequestType) => {
   const {
-    advertismentId,
     productName,
     productDescription,
-    views,
     categoryName,
     categoryId,
     subcategoryName,
@@ -134,18 +132,15 @@ export const prepareAdvertisment = (body: AdvertismentTypeRequestType) => {
     city,
     zip,
     address,
-    createdBy,
-    status,
-    inventoryDetails,
+
+
     productDetails
   } = body;
 
   // Construct the object excluding the images
   const formData = {
-    advertismentId,
     productName: productName?.value,
     productDescription: productDescription?.value,
-    views: views?.value,
     categoryName: categoryName?.value,
     categoryId: categoryId?.value,
     subcategoryName: subcategoryName?.value,
@@ -153,9 +148,7 @@ export const prepareAdvertisment = (body: AdvertismentTypeRequestType) => {
     city: city?.value,
     zip: zip?.value,
     address: address?.value,
-    createdBy,
-    status: status?.value,
-    inventoryDetails: inventoryDetails?.value,
+
     productDetails: productDetails?.value,
   };
 

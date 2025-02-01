@@ -21,6 +21,7 @@ exports.AdvertismentType = typebox_1.Type.Object({
     views: typebox_1.Type.Optional(typebox_1.Type.Number()),
     categoryName: typebox_1.Type.String(),
     categoryId: typebox_1.Type.String(),
+    price: typebox_1.Type.Number(),
     subcategoryName: typebox_1.Type.String(),
     subcategoryId: typebox_1.Type.String(),
     images: typebox_1.Type.Array(typebox_1.Type.String()),

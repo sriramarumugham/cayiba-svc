@@ -16,6 +16,8 @@ export const createAdminRequestSchema = {
     ...ErrorResponses,
     201: SuccessResponseType(AdminResponseDocument),
   },
+  security: [{ bearerAuth: [] }],
+
 } satisfies FastifySchema;
 
 export const createSubadminRequestSchema = {

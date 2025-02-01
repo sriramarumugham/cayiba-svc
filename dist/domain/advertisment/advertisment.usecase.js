@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAdvertismentByIdUsecase = exports.searchProductsUseCase = exports.getAdvertismentByStatus = exports.blockAdvertismentUseCase = exports.getUserAdvertismentsUsecase = exports.updateAdvertismentStatusUseCase = exports.deleteAdvertismentUseCase = exports.createAdvertismentUseCase = void 0;
+exports.incrementViewsUseCase = exports.getAdvertismentByIdUsecase = exports.searchProductsUseCase = exports.getAdvertismentByStatus = exports.blockAdvertismentUseCase = exports.getUserAdvertismentsUsecase = exports.updateAdvertismentStatusUseCase = exports.deleteAdvertismentUseCase = exports.createAdvertismentUseCase = void 0;
 const admin_repo_1 = require("../../data-access/admin.repo");
 const advertisment_schema_1 = __importDefault(require("../../data-access/models/advertisment.schema"));
 const user_schema_1 = __importDefault(require("../../data-access/models/user.schema"));
@@ -114,3 +114,5 @@ const getAdvertismentByIdUsecase = async (id) => {
     });
 };
 exports.getAdvertismentByIdUsecase = getAdvertismentByIdUsecase;
+const incrementViewsUseCase = (advertismentId) => advertisment_schema_1.default.findOneAndUpdate({ advertismentId }, { $inc: { views: 1 } });
+exports.incrementViewsUseCase = incrementViewsUseCase;

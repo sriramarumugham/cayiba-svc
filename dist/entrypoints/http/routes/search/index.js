@@ -28,6 +28,7 @@ const SearchRoute = async (fastify) => {
         try {
             const { id } = req.params;
             const advertisment = await (0, advertisment_usecase_1.getAdvertismentByIdUsecase)(id);
+            await (0, advertisment_usecase_1.incrementViewsUseCase)(id);
             if (!advertisment) {
                 return (0, response_1.createErrorResponse)(res, 'Advertisement not found or inactive', 404);
             }

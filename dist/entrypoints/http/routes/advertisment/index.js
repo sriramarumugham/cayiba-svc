@@ -7,7 +7,7 @@ const advertisment_usecase_1 = require("../../../../domain/advertisment/advertis
 const advertisment_util_1 = require("../../../../utils/advertisment.util");
 const auth_util_1 = require("../../../../utils/auth.util");
 const response_1 = require("../../../../utils/response");
-// const dummyImage = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2971&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+const s3_util_1 = require("../../../../utils/s3.util");
 const AdvertismentRoutes = async (fastify) => {
     fastify
         .withTypeProvider()
@@ -15,33 +15,29 @@ const AdvertismentRoutes = async (fastify) => {
         schema: advertisment_request_schema_1.createAdvertismentRequestSchema
     }, async (req, res) => {
         try {
-            const parts = req.files();
-            const uploadedImageUrls = [];
-            let fields = {};
-            for await (const part of parts) {
-                fields = part.fields;
-                if (part.type === 'file') {
-                    try {
-                        const localFilePath = `${part.filename}`;
-                        // console.log(`Processing file ${part.filename}...`);
-                        // await pipeline(part.file, fs.createWriteStream(localFilePath));
-                        // const imageUrls = await fileUpload(localFilePath);
-                        // uploadedImageUrls.push(...imageUrls);  
-                        // await unlink(localFilePath);
-                        // console.log(`File ${part.filename} uploaded and local file deleted.`);
-                    }
-                    catch (error) {
-                        console.error(`Error processing file ${part.filename}:`, error);
-                    }
-                }
-                else {
-                    console.log('Form field:', part);
-                }
+            const MAX_FILE_SIZE = 2 * 1024 * 1024;
+            const body = req.body;
+            const files = Array.isArray(body?.file) ? body.file : [body?.file];
+            if (files.length > 4) {
+                throw new Error("Cannot upload more than 4 imags");
             }
+            const preparedFiles = (await Promise.all(files?.map(async (fileData) => {
+                const fileBuffer = await fileData.toBuffer();
+                if (fileBuffer.length > MAX_FILE_SIZE) {
+                    throw new Error(`File ${fileData.filename} exceeds the 2MB size limit.`);
+                }
+                const filePayload = {
+                    fileName: fileData.filename,
+                    mimetype: fileData.mimetype,
+                    file: fileBuffer
+                };
+                return filePayload;
+            }) || []));
+            const uploadedFilesUrls = await (0, s3_util_1.s3BulkUpload)(preparedFiles);
             try {
                 const user = (0, auth_util_1.getUserIdFromRequestHeader)(req);
-                const payload = (0, advertisment_util_1.prepareAdvertisment)(fields);
-                payload.images = uploadedImageUrls;
+                const payload = (0, advertisment_util_1.prepareAdvertisment)(body);
+                payload.images = uploadedFilesUrls;
                 await (0, advertisment_usecase_1.createAdvertismentUseCase)(payload, user.userId);
                 return (0, response_1.createSuccessResponse)(res, 'Advertisement created!');
             }
@@ -50,7 +46,6 @@ const AdvertismentRoutes = async (fastify) => {
                 const statusCode = error?.status || 500;
                 return (0, response_1.createErrorResponse)(res, message, statusCode);
             }
-            (0, response_1.createSuccessResponse)(res, 'Advertisment created!');
         }
         catch (error) {
             const message = error.message || 'An unexpected error occurred';

@@ -4,6 +4,7 @@ import {
 } from '@/domain/advertisment/advertisment.request-schema';
 import {
   getAdvertismentByIdUsecase,
+  incrementViewsUseCase,
   searchProductsUseCase,
 } from '@/domain/advertisment/advertisment.usecase';
 import { createErrorResponse, createSuccessResponse } from '@/utils/response';
@@ -60,6 +61,8 @@ const SearchRoute: FastifyPluginAsync = async (fastify) => {
 
           const advertisment = await getAdvertismentByIdUsecase(id);
 
+          await incrementViewsUseCase(id);
+          
           if (!advertisment) {
             return createErrorResponse(
               res,

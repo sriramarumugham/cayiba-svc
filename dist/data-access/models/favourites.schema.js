@@ -33,31 +33,10 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-const uuid_util_1 = require("../../utils/uuid.util");
 const mongoose_1 = __importStar(require("mongoose"));
-const types_1 = require("../../types");
-const AdvertismentSchema = new mongoose_1.Schema({
-    advertismentId: { type: String, rquired: true, default: uuid_util_1.getUUID },
-    productName: { type: String, required: true },
-    productDescription: { type: String, required: true },
-    views: { type: Number, default: 0 },
-    categoryName: { type: String, required: true },
-    categoryId: { type: String, required: true },
-    subcategoryName: { type: String, required: true },
-    subcategoryId: { type: String, required: true },
-    price: { type: Number, required: true },
-    images: [{ type: String, required: true }],
-    city: { type: String, required: true },
-    zip: { type: String, required: true },
-    address: { type: String, required: true },
-    createdBy: { type: String, required: true },
-    status: { type: String, default: types_1.E_STATUS.ACTIVE, required: true },
-    inventoryDetails: {
-        type: String,
-        default: types_1.E_INVENTORY_STATUS.AVAILABLE,
-        required: true,
-    },
-    productDetails: { type: mongoose_1.Schema.Types.Mixed, required: false },
+const FavouriteSchema = new mongoose_1.Schema({
+    userId: { type: String, required: true },
+    advertismentId: { type: mongoose_1.default.Schema.Types.ObjectId, required: true, ref: 'Advertisment' },
 }, { timestamps: true });
-const AdvertismentModel = mongoose_1.default.model('Advertisment', AdvertismentSchema);
-exports.default = AdvertismentModel;
+const FavouriteModel = mongoose_1.default.model('Favourite', FavouriteSchema);
+exports.default = FavouriteModel;

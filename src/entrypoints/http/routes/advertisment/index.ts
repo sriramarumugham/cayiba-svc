@@ -18,18 +18,13 @@ import {
   updateAdvertismentStatusUseCase,
 } from '@/domain/advertisment/advertisment.usecase';
 import { AdvertismentTypeRequestType } from '@/types';
-import {  prepareAdvertisment, validateAdvertismentForm } from '@/utils/advertisment.util';
+import { prepareAdvertisment, validateAdvertismentForm } from '@/utils/advertisment.util';
 import { getUserIdFromRequestHeader } from '@/utils/auth.util';
-import { fileUpload } from '@/utils/file-upload.util';
 import { createErrorResponse, createSuccessResponse } from '@/utils/response';
+import { CustomFile, s3BulkUpload } from '@/utils/s3.util';
 import { Static, TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
 
-import * as fs from 'fs';
-import { unlink } from 'fs/promises';
-
-import { pipeline } from 'node:stream/promises';
-// const dummyImage = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2971&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 const AdvertismentRoutes: FastifyPluginAsync = async (fastify) => {
   fastify
     .withTypeProvider<TypeBoxTypeProvider>()
@@ -44,37 +39,42 @@ const AdvertismentRoutes: FastifyPluginAsync = async (fastify) => {
         res: FastifyReply,
       ) => {
         try {
-   
-          const parts = req.files();
-          const uploadedImageUrls: string[] = [];
-          let fields={};
+          const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
-          for await (const part of parts) {
-            fields = part.fields;
+          const body = req.body as unknown as any;
 
-            if (part.type === 'file') {
-              try {
-                const localFilePath = `${part.filename}`;  
 
-                // console.log(`Processing file ${part.filename}...`);
-                // await pipeline(part.file, fs.createWriteStream(localFilePath));
+          const files = Array.isArray(body?.file) ? body.file : [body?.file];
 
-                // const imageUrls = await fileUpload(localFilePath);
-                // uploadedImageUrls.push(...imageUrls);  
-                // await unlink(localFilePath);
-                // console.log(`File ${part.filename} uploaded and local file deleted.`);
-              } catch (error) {
-                console.error(`Error processing file ${part.filename}:`, error);
-              }
-            } else {
-              console.log('Form field:', part);
-            }
+          if (files.length > 4) {
+            throw new Error("Cannot upload more than 4 imags");
           }
+
+          const preparedFiles: CustomFile[] = (await Promise.all(
+            files?.map(async (fileData: any) => {
+              const fileBuffer = await fileData.toBuffer();
+              
+              if (fileBuffer.length > MAX_FILE_SIZE) {
+                throw new Error(`File ${fileData.filename} exceeds the 2MB size limit.`);
+              }
+
+              const filePayload = {
+                fileName: fileData.filename,
+                mimetype: fileData.mimetype,
+                file: fileBuffer
+              };
+              return filePayload;
+            }) || [],
+          )) as CustomFile[];
+          
+          const uploadedFilesUrls = await s3BulkUpload(preparedFiles);
+
+
 
           try {
             const user = getUserIdFromRequestHeader(req);
-            const payload:any = prepareAdvertisment(fields as unknown as any);  
-            payload.images = uploadedImageUrls; 
+            const payload:any = prepareAdvertisment(body as unknown as any);  
+            payload.images = uploadedFilesUrls; 
             await createAdvertismentUseCase(payload, user.userId); 
            return createSuccessResponse(res, 'Advertisement created!');
           } catch (error:any) {
@@ -82,7 +82,6 @@ const AdvertismentRoutes: FastifyPluginAsync = async (fastify) => {
             const statusCode = error?.status || 500;
            return createErrorResponse(res, message, statusCode);
           }
-          createSuccessResponse(res, 'Advertisment created!');
         } catch (error: any) {
           const message = error.message || 'An unexpected error occurred';
           const statusCode = error.status || 500;

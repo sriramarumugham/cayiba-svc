@@ -10,6 +10,7 @@ exports.createAdminRequestSchema = {
         ...response_type_1.ErrorResponses,
         201: (0, response_type_1.SuccessResponseType)(admin_type_1.AdminResponseDocument),
     },
+    security: [{ bearerAuth: [] }],
 };
 exports.createSubadminRequestSchema = {
     tags: ['admin'],
