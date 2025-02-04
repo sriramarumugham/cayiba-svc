@@ -67,13 +67,20 @@ const AdvertismentRoutes: FastifyPluginAsync = async (fastify) => {
             }) || [],
           )) as CustomFile[];
           
+
           // const uploadedFilesUrls = await s3BulkUpload(preparedFiles);
 
-          const uploadedFilesUrls=[""]
-
+          let uploadedFilesUrls = [""]
+          try {
+            uploadedFilesUrls = await s3BulkUpload(preparedFiles);
+          } catch (error) {
+            console.log("ERRO_UPLPADIN_FILES__", uploadedFilesUrls)
+          }
           try {
             const user = getUserIdFromRequestHeader(req);
-            const payload:any = prepareAdvertisment(body as unknown as any);  
+            console.log("USER__", user)
+            const payload: any = prepareAdvertisment(body as unknown as any); 
+            console.log("PAYLOAD__", payload)
             payload.images = uploadedFilesUrls; 
             await createAdvertismentUseCase(payload, user.userId); 
            return createSuccessResponse(res, 'Advertisement created!');
