@@ -71,7 +71,8 @@ export const AdvertismentTypeRequestType = Type.Object({
   categoryId: Type.Object({ value: Type.String() }),
   subcategoryName: Type.Object({ value: Type.String() }),
   subcategoryId: Type.Object({ value: Type.String() }),
-  images: Type.Object({ value: Type.Array(
+  images: Type.Optional(
+    Type.Object({ value: Type.Array(
     Type.Object({
       fieldname: Type.String(),
       filename: Type.String(),
@@ -80,6 +81,7 @@ export const AdvertismentTypeRequestType = Type.Object({
       file: Type.Any(),
     })
   ) }),
+  ),
   city: Type.Object({ value: Type.String() }),
   zip: Type.Object({ value: Type.String() }),
   address: Type.Object({ value: Type.String() }),

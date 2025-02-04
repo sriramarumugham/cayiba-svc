@@ -67,9 +67,9 @@ const AdvertismentRoutes: FastifyPluginAsync = async (fastify) => {
             }) || [],
           )) as CustomFile[];
           
-          const uploadedFilesUrls = await s3BulkUpload(preparedFiles);
+          // const uploadedFilesUrls = await s3BulkUpload(preparedFiles);
 
-
+          const uploadedFilesUrls=[""]
 
           try {
             const user = getUserIdFromRequestHeader(req);
