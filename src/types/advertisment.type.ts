@@ -63,6 +63,7 @@ export type searchRequestType = Static<typeof searchRequestDocument>;
 // form data schema
 export const AdvertismentTypeRequestType = Type.Object({
   advertismentId: Type.String(),
+  price:Type.Any(),
   productName: Type.Object({ value: Type.String() }),
   productDescription: Type.Object({ value: Type.String() }),
   views: Type.Object({ value: Type.Number() }),

@@ -132,8 +132,7 @@ export const prepareAdvertisment = (body: AdvertismentTypeRequestType) => {
     city,
     zip,
     address,
-
-
+    price,
     productDetails
   } = body;
 
@@ -148,7 +147,7 @@ export const prepareAdvertisment = (body: AdvertismentTypeRequestType) => {
     city: city?.value,
     zip: zip?.value,
     address: address?.value,
-
+   price:price.value,
     productDetails: productDetails?.value,
   };
 
