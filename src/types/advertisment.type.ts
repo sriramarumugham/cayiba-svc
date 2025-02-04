@@ -19,7 +19,7 @@ export const AdvertismentType = Type.Object({
   views:  Type.Optional(Type.Number()),
   categoryName: Type.String(),
   categoryId: Type.String(),
-  price:Type.Number(),
+  price:Type.Any(),
   subcategoryName: Type.String(),
   subcategoryId: Type.String(),
   images: Type.Array(Type.String()),

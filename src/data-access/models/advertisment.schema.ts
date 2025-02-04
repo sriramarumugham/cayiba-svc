@@ -16,7 +16,7 @@ const AdvertismentSchema: Schema<AdvertismentDocument> = new Schema(
     categoryId: { type: String, required: true },
     subcategoryName: { type: String, required: true },
     subcategoryId: { type: String, required: true },
-    price:{type:Number,required:true},
+    price:{type:String },
     images: [{ type: String }],
     city: { type: String, required: true },
     zip: { type: String, required: true },
