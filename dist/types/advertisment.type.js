@@ -21,7 +21,7 @@ exports.AdvertismentType = typebox_1.Type.Object({
     views: typebox_1.Type.Optional(typebox_1.Type.Number()),
     categoryName: typebox_1.Type.String(),
     categoryId: typebox_1.Type.String(),
-    price: typebox_1.Type.Number(),
+    price: typebox_1.Type.Any(),
     subcategoryName: typebox_1.Type.String(),
     subcategoryId: typebox_1.Type.String(),
     images: typebox_1.Type.Array(typebox_1.Type.String()),
@@ -49,6 +49,7 @@ exports.searchRequestDocument = typebox_1.Type.Object({
 // form data schema
 exports.AdvertismentTypeRequestType = typebox_1.Type.Object({
     advertismentId: typebox_1.Type.String(),
+    price: typebox_1.Type.Any(),
     productName: typebox_1.Type.Object({ value: typebox_1.Type.String() }),
     productDescription: typebox_1.Type.Object({ value: typebox_1.Type.String() }),
     views: typebox_1.Type.Object({ value: typebox_1.Type.Number() }),
@@ -56,13 +57,13 @@ exports.AdvertismentTypeRequestType = typebox_1.Type.Object({
     categoryId: typebox_1.Type.Object({ value: typebox_1.Type.String() }),
     subcategoryName: typebox_1.Type.Object({ value: typebox_1.Type.String() }),
     subcategoryId: typebox_1.Type.Object({ value: typebox_1.Type.String() }),
-    images: typebox_1.Type.Object({ value: typebox_1.Type.Array(typebox_1.Type.Object({
+    images: typebox_1.Type.Optional(typebox_1.Type.Object({ value: typebox_1.Type.Array(typebox_1.Type.Object({
             fieldname: typebox_1.Type.String(),
             filename: typebox_1.Type.String(),
             encoding: typebox_1.Type.String(),
             mimetype: typebox_1.Type.String(),
             file: typebox_1.Type.Any(),
-        })) }),
+        })) })),
     city: typebox_1.Type.Object({ value: typebox_1.Type.String() }),
     zip: typebox_1.Type.Object({ value: typebox_1.Type.String() }),
     address: typebox_1.Type.Object({ value: typebox_1.Type.String() }),

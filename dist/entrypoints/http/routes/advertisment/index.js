@@ -33,10 +33,19 @@ const AdvertismentRoutes = async (fastify) => {
                 };
                 return filePayload;
             }) || []));
-            const uploadedFilesUrls = await (0, s3_util_1.s3BulkUpload)(preparedFiles);
+            // const uploadedFilesUrls = await s3BulkUpload(preparedFiles);
+            let uploadedFilesUrls = [""];
+            try {
+                uploadedFilesUrls = await (0, s3_util_1.s3BulkUpload)(preparedFiles);
+            }
+            catch (error) {
+                console.log("ERRO_UPLPADIN_FILES__", uploadedFilesUrls);
+            }
             try {
                 const user = (0, auth_util_1.getUserIdFromRequestHeader)(req);
+                console.log("USER__", user);
                 const payload = (0, advertisment_util_1.prepareAdvertisment)(body);
+                console.log("PAYLOAD__", payload);
                 payload.images = uploadedFilesUrls;
                 await (0, advertisment_usecase_1.createAdvertismentUseCase)(payload, user.userId);
                 return (0, response_1.createSuccessResponse)(res, 'Advertisement created!');

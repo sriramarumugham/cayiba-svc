@@ -106,7 +106,7 @@ const validateAdvertismentForm = async (fields, res) => {
 exports.validateAdvertismentForm = validateAdvertismentForm;
 // Helper function to process form data and return the object excluding 'images'
 const prepareAdvertisment = (body) => {
-    const { productName, productDescription, categoryName, categoryId, subcategoryName, subcategoryId, city, zip, address, productDetails } = body;
+    const { productName, productDescription, categoryName, categoryId, subcategoryName, subcategoryId, city, zip, address, price, productDetails } = body;
     // Construct the object excluding the images
     const formData = {
         productName: productName?.value,
@@ -118,6 +118,7 @@ const prepareAdvertisment = (body) => {
         city: city?.value,
         zip: zip?.value,
         address: address?.value,
+        price: price?.value,
         productDetails: productDetails?.value,
     };
     return formData;
