@@ -17,31 +17,42 @@ const AdvertismentRoutes = async (fastify) => {
         try {
             const MAX_FILE_SIZE = 2 * 1024 * 1024;
             const body = req.body;
-            const files = Array.isArray(body?.file) ? body.file : [body?.file];
-            if (files.length > 4) {
-                throw new Error("Cannot upload more than 4 imags");
-            }
-            const preparedFiles = (await Promise.all(files?.map(async (fileData) => {
-                const fileBuffer = await fileData?.toBuffer();
-                if (fileBuffer.length > MAX_FILE_SIZE) {
-                    throw new Error(`File ${fileData.filename} exceeds the 2MB size limit.`);
-                }
-                const filePayload = {
-                    fileName: fileData.filename,
-                    mimetype: fileData.mimetype,
-                    file: fileBuffer
-                };
-                return filePayload;
-            }) || []));
-            // const uploadedFilesUrls = await s3BulkUpload(preparedFiles);
-            let uploadedFilesUrls = [""];
+            let preparedFiles = [];
             try {
-                uploadedFilesUrls = await (0, s3_util_1.s3BulkUpload)(preparedFiles);
+                const files = Array.isArray(body?.file) ? body.file : [body?.file];
+                if (files.length > 4) {
+                    throw new Error("Cannot upload more than 4 imags");
+                }
+                preparedFiles = (await Promise.all(files?.map(async (fileData) => {
+                    const fileBuffer = await fileData?.toBuffer();
+                    if (!fileBuffer) {
+                        return;
+                    }
+                    if (fileBuffer?.length > MAX_FILE_SIZE) {
+                        throw new Error(`File ${fileData.filename} exceeds the 2MB size limit.`);
+                    }
+                    const filePayload = {
+                        fileName: fileData?.filename,
+                        mimetype: fileData?.mimetype,
+                        file: fileBuffer
+                    };
+                    return filePayload;
+                }) || []));
             }
             catch (error) {
-                console.log("ERRO_UPLPADIN_FILES__", uploadedFilesUrls);
+                console.log('FileProcessingError', error);
+            }
+            let uploadedFilesUrls = [""];
+            try {
+                if (preparedFiles.length > 0) {
+                    uploadedFilesUrls = await (0, s3_util_1.s3BulkUpload)(preparedFiles);
+                }
+            }
+            catch (error) {
+                console.log("ERRO_UPLPADIN_FILES__", error);
             }
             try {
+                console.log("uploadedFilesUrls__", uploadedFilesUrls);
                 const user = (0, auth_util_1.getUserIdFromRequestHeader)(req);
                 console.log("USER__", user);
                 const payload = (0, advertisment_util_1.prepareAdvertisment)(body);

@@ -43,40 +43,50 @@ const AdvertismentRoutes: FastifyPluginAsync = async (fastify) => {
 
           const body = req.body as unknown as any;
 
-
+          let preparedFiles:CustomFile[] = [];
+          try {
+            
           const files = Array.isArray(body?.file) ? body.file : [body?.file];
 
           if (files.length > 4) {
             throw new Error("Cannot upload more than 4 imags");
           }
 
-          const preparedFiles: CustomFile[] = (await Promise.all(
+           preparedFiles = (await Promise.all(
             files?.map(async (fileData: any) => {
               const fileBuffer = await fileData?.toBuffer();
               
-              if (fileBuffer.length > MAX_FILE_SIZE) {
+              if (!fileBuffer) {
+                return;
+              }
+              if (fileBuffer?.length > MAX_FILE_SIZE) {
                 throw new Error(`File ${fileData.filename} exceeds the 2MB size limit.`);
               }
 
               const filePayload = {
-                fileName: fileData.filename,
-                mimetype: fileData.mimetype,
+                fileName: fileData?.filename,
+                mimetype: fileData?.mimetype,
                 file: fileBuffer
               };
               return filePayload;
             }) || [],
           )) as CustomFile[];
-          
-
-          // const uploadedFilesUrls = await s3BulkUpload(preparedFiles);
-
-          let uploadedFilesUrls = [""]
-          try {
-            uploadedFilesUrls = await s3BulkUpload(preparedFiles);
           } catch (error) {
-            console.log("ERRO_UPLPADIN_FILES__", uploadedFilesUrls)
+            console.log('FileProcessingError',error)
+          }
+
+
+          let uploadedFilesUrls = [""];
+          
+          try {
+            if (preparedFiles.length > 0) { 
+              uploadedFilesUrls = await s3BulkUpload(preparedFiles);
+            }
+          } catch (error) {
+            console.log("ERRO_UPLPADIN_FILES__", error)
           }
           try {
+            console.log("uploadedFilesUrls__",uploadedFilesUrls)
             const user = getUserIdFromRequestHeader(req);
             console.log("USER__", user)
             const payload: any = prepareAdvertisment(body as unknown as any); 
