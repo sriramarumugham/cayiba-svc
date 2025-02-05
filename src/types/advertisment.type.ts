@@ -19,7 +19,7 @@ export const AdvertismentType = Type.Object({
   views:  Type.Optional(Type.Number()),
   categoryName: Type.String(),
   categoryId: Type.String(),
-  price:Type.Any(),
+  price: Type.Optional(Type.Any()),
   subcategoryName: Type.String(),
   subcategoryId: Type.String(),
   images: Type.Array(Type.String()),
@@ -63,7 +63,7 @@ export type searchRequestType = Static<typeof searchRequestDocument>;
 // form data schema
 export const AdvertismentTypeRequestType = Type.Object({
   advertismentId: Type.String(),
-  price:Type.Any(),
+  price:Type.Optional(Type.Any()),
   productName: Type.Object({ value: Type.String() }),
   productDescription: Type.Object({ value: Type.String() }),
   views: Type.Object({ value: Type.Number() }),
