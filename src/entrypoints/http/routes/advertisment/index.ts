@@ -52,7 +52,7 @@ const AdvertismentRoutes: FastifyPluginAsync = async (fastify) => {
 
           const preparedFiles: CustomFile[] = (await Promise.all(
             files?.map(async (fileData: any) => {
-              const fileBuffer = await fileData.toBuffer();
+              const fileBuffer = await fileData?.toBuffer();
               
               if (fileBuffer.length > MAX_FILE_SIZE) {
                 throw new Error(`File ${fileData.filename} exceeds the 2MB size limit.`);

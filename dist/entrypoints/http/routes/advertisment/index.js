@@ -22,7 +22,7 @@ const AdvertismentRoutes = async (fastify) => {
                 throw new Error("Cannot upload more than 4 imags");
             }
             const preparedFiles = (await Promise.all(files?.map(async (fileData) => {
-                const fileBuffer = await fileData.toBuffer();
+                const fileBuffer = await fileData?.toBuffer();
                 if (fileBuffer.length > MAX_FILE_SIZE) {
                     throw new Error(`File ${fileData.filename} exceeds the 2MB size limit.`);
                 }
