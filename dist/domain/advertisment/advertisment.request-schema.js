@@ -7,7 +7,7 @@ const typebox_1 = require("@sinclair/typebox");
 const advertisment_type_1 = require("../../types/advertisment.type");
 const helpers_1 = require("../../utils/helpers");
 exports.createAdvertismentRequestSchema = {
-    tags: ['advertisment'],
+    tags: ["advertisment"],
     response: {
         ...response_type_1.ErrorResponses,
         201: (0, response_type_1.SuccessResponseType)(),
@@ -15,7 +15,7 @@ exports.createAdvertismentRequestSchema = {
     description: `This API requires form data. Upload the images and other fields in form data. \n\nSchema:\n${(0, helpers_1.generateSchemaDescription)(types_1.AdvertismentType)}`,
 };
 exports.updateAdvertismentInverntorySchema = {
-    tags: ['advertisment'],
+    tags: ["advertisment"],
     body: advertisment_type_1.UpdateInventoryDocument,
     response: {
         ...response_type_1.ErrorResponses,
@@ -23,7 +23,7 @@ exports.updateAdvertismentInverntorySchema = {
     },
 };
 exports.getAdvertismentByStatusSchema = {
-    tags: ['advertisment'],
+    tags: ["advertisment"],
     querystring: typebox_1.Type.Object({
         status: typebox_1.Type.Enum(advertisment_type_1.E_STATUS), // Add valid advertisement statuses
     }),
@@ -33,7 +33,7 @@ exports.getAdvertismentByStatusSchema = {
     },
 };
 exports.blockAdvertismentSchema = {
-    tags: ['advertisment'],
+    tags: ["advertisment"],
     params: typebox_1.Type.Object({
         advertismentId: typebox_1.Type.String(), // Advertisement ID to block
     }),
@@ -43,14 +43,14 @@ exports.blockAdvertismentSchema = {
     },
 };
 exports.getPublishedAdvertisementsSchema = {
-    tags: ['advertisment'],
+    tags: ["advertisment"],
     response: {
         ...response_type_1.ErrorResponses,
         200: (0, response_type_1.SuccessResponseType)(typebox_1.Type.Array(types_1.AdvertismentType)),
     },
 };
 exports.deleteAdvertismentSchema = {
-    tags: ['advertisment'],
+    tags: ["advertisment"],
     params: typebox_1.Type.Object({
         id: typebox_1.Type.String(), // Expecting the advertisement ID as a path parameter
     }),
@@ -61,15 +61,15 @@ exports.deleteAdvertismentSchema = {
 };
 // search
 exports.searchRequestSchema = {
-    tags: ['search'], // Updated tag
-    querystring: advertisment_type_1.searchRequestDocument, // Ensure this is a TypeBox schema
+    tags: ["search"],
+    querystring: advertisment_type_1.searchRequestDocument,
     response: {
         ...response_type_1.ErrorResponses,
-        200: (0, response_type_1.SuccessResponseType)(typebox_1.Type.Array(types_1.AdvertismentType)),
+        200: (0, response_type_1.SuccessResponseType)(typebox_1.Type.Array(advertisment_type_1.SearchProductType)),
     },
 };
 exports.getAdvertismentByIdRequestSchema = {
-    tags: ['search'], // Updated tag
+    tags: ["search"], // Updated tag
     params: typebox_1.Type.Object({ id: typebox_1.Type.String() }),
     response: {
         ...response_type_1.ErrorResponses,

@@ -1,22 +1,21 @@
-import { isAdmin } from '@/data-access/admin.repo';
-import AdvertismentModel from '@/data-access/models/advertisment.schema';
-import UserModel from '@/data-access/models/user.schema';
+import { isAdmin } from "@/data-access/admin.repo";
+import AdvertismentModel from "@/data-access/models/advertisment.schema";
+import UserModel from "@/data-access/models/user.schema";
 import {
   AdvertismentDocument,
   CreateAdvertismentRequestType,
   E_INVENTORY_STATUS,
   E_STATUS,
   UpdateInventoryType,
-} from '@/types';
-
+} from "@/types";
 
 export const createAdvertismentUseCase = async (
   body: CreateAdvertismentRequestType,
-  userId: string,
+  userId: string
 ) => {
   const user = await UserModel.findOne({ userId });
   if (!user) {
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 
   // TODO profile to upload user information
@@ -24,7 +23,7 @@ export const createAdvertismentUseCase = async (
   //   throw new Error('User profile is incomplete. Please update your profile.');
   // }
 
-  const response=await AdvertismentModel.create({
+  const response = await AdvertismentModel.create({
     ...body,
     status: E_STATUS.ACTIVE,
     createdAt: new Date(),
@@ -35,15 +34,15 @@ export const createAdvertismentUseCase = async (
 
 export const deleteAdvertismentUseCase = async (
   advertismentId: string,
-  userId: string,
+  userId: string
 ) => {
   const advertisment = await AdvertismentModel.findOne({
     advertismentId: advertismentId,
-    createdBy:userId,
+    createdBy: userId,
   });
 
   if (!advertisment) {
-    throw new Error('Advertisement not found or access denied.');
+    throw new Error("Advertisement not found or access denied.");
   }
 
   await AdvertismentModel.updateOne({ status: E_STATUS.DELETED });
@@ -52,15 +51,15 @@ export const deleteAdvertismentUseCase = async (
 export const updateAdvertismentStatusUseCase = async (
   advertismentId: string,
   body: UpdateInventoryType,
-  userId: string,
+  userId: string
 ) => {
   const advertisment = await AdvertismentModel.findOne({
     advertismentId: advertismentId,
-    createdBy:userId,
+    createdBy: userId,
   });
 
   if (!advertisment) {
-    throw new Error('Advertisement not found or access denied.');
+    throw new Error("Advertisement not found or access denied.");
   }
 
   await AdvertismentModel.updateOne({
@@ -75,11 +74,11 @@ const INVENTORY_ORDER: Record<E_INVENTORY_STATUS, number> = {
 };
 
 export const getUserAdvertismentsUsecase = async (
-  userId: string,
+  userId: string
 ): Promise<AdvertismentDocument[]> => {
   const adverts = await AdvertismentModel.find<AdvertismentDocument>({
     status: E_STATUS.ACTIVE,
-    createdBy:userId
+    createdBy: userId,
   }).exec();
 
   return adverts.sort((a, b) => {
@@ -89,15 +88,14 @@ export const getUserAdvertismentsUsecase = async (
   });
 };
 
-
 export const blockAdvertismentUseCase = async (
   adminId: string,
-  advertismentId: string,
+  advertismentId: string
 ): Promise<void> => {
   const isAdminUser = await isAdmin(adminId);
 
   if (!isAdminUser) {
-    throw new Error('Only admins can update advertisement statuses');
+    throw new Error("Only admins can update advertisement statuses");
   }
 
   await AdvertismentModel.findByIdAndUpdate(advertismentId, {
@@ -107,12 +105,12 @@ export const blockAdvertismentUseCase = async (
 
 export const getAdvertismentByStatus = async (
   adminId: string,
-  status: E_STATUS,
+  status: E_STATUS
 ): Promise<void> => {
   const isAdminUser = await isAdmin(adminId);
 
   if (!isAdminUser) {
-    throw new Error('Only admins can  acces the  advertisement buystatuses');
+    throw new Error("Only admins can  acces the  advertisement buystatuses");
   }
 
   await AdvertismentModel.find({
@@ -127,41 +125,63 @@ export const searchProductsUseCase = async ({
 }: {
   productName?: string;
   categoryName?: string;
-  searchText?: string; 
+  searchText?: string;
 }): Promise<any> => {
   const query: any = {
     status: E_STATUS.ACTIVE,
     inventoryDetails: E_INVENTORY_STATUS.AVAILABLE,
   };
-  
+
   if (productName) {
-    query.productName = { $regex: productName, $options: 'i' }; // Case-insensitive search
+    query.productName = { $regex: productName, $options: "i" }; // Case-insensitive search
   }
 
   if (categoryName) {
-    query.categoryName = { $regex: categoryName, $options: 'i' };
+    query.categoryName = { $regex: categoryName, $options: "i" };
   }
 
   if (searchText) {
-    const regex = new RegExp(searchText, 'i'); 
+    const regex = new RegExp(searchText, "i");
     query.$or = [
       { productName: { $regex: regex } },
       { categoryName: { $regex: regex } },
       { productDescription: { $regex: regex } },
     ];
   }
-  return await AdvertismentModel.find(query);
+
+  const results = await AdvertismentModel.aggregate([
+    { $match: query },
+    {
+      $lookup: {
+        from: "users",
+        foreignField: "userId",
+        localField: "createdBy",
+        as: "userDetails",
+      },
+    },
+    {
+      $unwind: "$userDetails",
+    },
+    {
+      $project: {
+        "userDetails.password": 0,
+        "userDetails.userId": 0,
+      },
+    },
+  ]);
+
+  return results;
 };
 
 export const getAdvertismentByIdUsecase = async (id: string) => {
   return await AdvertismentModel.findOne({
     advertismentId: id,
-    status: E_STATUS.ACTIVE, 
+    status: E_STATUS.ACTIVE,
   });
 };
 
 export const incrementViewsUseCase = (advertismentId: string) =>
   AdvertismentModel.findOneAndUpdate(
     { advertismentId },
-    { $inc: { views: 1 } }, 
+    { $inc: { views: 1 } }
   );

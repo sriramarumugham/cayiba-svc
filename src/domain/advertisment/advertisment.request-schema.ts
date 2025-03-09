@@ -1,25 +1,28 @@
-import { AdvertismentType, CreateAdvertismentRequestDocument } from '@/types';
-import { ErrorResponses, SuccessResponseType } from '@/types/response.type';
-import { Type } from '@sinclair/typebox';
-import { FastifySchema } from 'fastify';
+import { AdvertismentType, CreateAdvertismentRequestDocument } from "@/types";
+import { ErrorResponses, SuccessResponseType } from "@/types/response.type";
+import { Type } from "@sinclair/typebox";
+import { FastifySchema } from "fastify";
 import {
   E_STATUS,
+  SearchProductType,
   searchRequestDocument,
   UpdateInventoryDocument,
-} from '../../types/advertisment.type';
-import { generateSchemaDescription } from '@/utils/helpers';
+} from "../../types/advertisment.type";
+import { generateSchemaDescription } from "@/utils/helpers";
 
 export const createAdvertismentRequestSchema = {
-  tags: ['advertisment'],
+  tags: ["advertisment"],
   response: {
     ...ErrorResponses,
     201: SuccessResponseType(),
   },
-  description: `This API requires form data. Upload the images and other fields in form data. \n\nSchema:\n${generateSchemaDescription(AdvertismentType)}`,
+  description: `This API requires form data. Upload the images and other fields in form data. \n\nSchema:\n${generateSchemaDescription(
+    AdvertismentType
+  )}`,
 } satisfies FastifySchema;
 
 export const updateAdvertismentInverntorySchema = {
-  tags: ['advertisment'],
+  tags: ["advertisment"],
   body: UpdateInventoryDocument,
   response: {
     ...ErrorResponses,
@@ -28,7 +31,7 @@ export const updateAdvertismentInverntorySchema = {
 } satisfies FastifySchema;
 
 export const getAdvertismentByStatusSchema = {
-  tags: ['advertisment'],
+  tags: ["advertisment"],
   querystring: Type.Object({
     status: Type.Enum(E_STATUS), // Add valid advertisement statuses
   }),
@@ -39,7 +42,7 @@ export const getAdvertismentByStatusSchema = {
 } satisfies FastifySchema;
 
 export const blockAdvertismentSchema = {
-  tags: ['advertisment'],
+  tags: ["advertisment"],
   params: Type.Object({
     advertismentId: Type.String(), // Advertisement ID to block
   }),
@@ -50,7 +53,7 @@ export const blockAdvertismentSchema = {
 } satisfies FastifySchema;
 
 export const getPublishedAdvertisementsSchema = {
-  tags: ['advertisment'],
+  tags: ["advertisment"],
   response: {
     ...ErrorResponses,
     200: SuccessResponseType(Type.Array(AdvertismentType)),
@@ -58,7 +61,7 @@ export const getPublishedAdvertisementsSchema = {
 } satisfies FastifySchema;
 
 export const deleteAdvertismentSchema = {
-  tags: ['advertisment'],
+  tags: ["advertisment"],
   params: Type.Object({
     id: Type.String(), // Expecting the advertisement ID as a path parameter
   }),
@@ -70,16 +73,16 @@ export const deleteAdvertismentSchema = {
 
 // search
 export const searchRequestSchema = {
-  tags: ['search'], // Updated tag
-  querystring: searchRequestDocument, // Ensure this is a TypeBox schema
+  tags: ["search"],
+  querystring: searchRequestDocument,
   response: {
     ...ErrorResponses,
-    200: SuccessResponseType(Type.Array(AdvertismentType)),
+    200: SuccessResponseType(Type.Array(SearchProductType)),
   },
 } satisfies FastifySchema;
 
 export const getAdvertismentByIdRequestSchema = {
-  tags: ['search'], // Updated tag
+  tags: ["search"], // Updated tag
   params: Type.Object({ id: Type.String() }),
   response: {
     ...ErrorResponses,

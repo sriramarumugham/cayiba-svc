@@ -11,7 +11,7 @@ const types_1 = require("../../types");
 const createAdvertismentUseCase = async (body, userId) => {
     const user = await user_schema_1.default.findOne({ userId });
     if (!user) {
-        throw new Error('User not found');
+        throw new Error("User not found");
     }
     // TODO profile to upload user information
     // if (!isValidProfile.Check(user)) {
@@ -32,7 +32,7 @@ const deleteAdvertismentUseCase = async (advertismentId, userId) => {
         createdBy: userId,
     });
     if (!advertisment) {
-        throw new Error('Advertisement not found or access denied.');
+        throw new Error("Advertisement not found or access denied.");
     }
     await advertisment_schema_1.default.updateOne({ status: types_1.E_STATUS.DELETED });
 };
@@ -43,7 +43,7 @@ const updateAdvertismentStatusUseCase = async (advertismentId, body, userId) => 
         createdBy: userId,
     });
     if (!advertisment) {
-        throw new Error('Advertisement not found or access denied.');
+        throw new Error("Advertisement not found or access denied.");
     }
     await advertisment_schema_1.default.updateOne({
         inventoryDetails: body?.inventoryDetails,
@@ -58,7 +58,7 @@ const INVENTORY_ORDER = {
 const getUserAdvertismentsUsecase = async (userId) => {
     const adverts = await advertisment_schema_1.default.find({
         status: types_1.E_STATUS.ACTIVE,
-        createdBy: userId
+        createdBy: userId,
     }).exec();
     return adverts.sort((a, b) => {
         return (INVENTORY_ORDER[a.inventoryDetails] - INVENTORY_ORDER[b.inventoryDetails]);
@@ -68,7 +68,7 @@ exports.getUserAdvertismentsUsecase = getUserAdvertismentsUsecase;
 const blockAdvertismentUseCase = async (adminId, advertismentId) => {
     const isAdminUser = await (0, admin_repo_1.isAdmin)(adminId);
     if (!isAdminUser) {
-        throw new Error('Only admins can update advertisement statuses');
+        throw new Error("Only admins can update advertisement statuses");
     }
     await advertisment_schema_1.default.findByIdAndUpdate(advertismentId, {
         status: types_1.E_STATUS.BLOCKED,
@@ -78,7 +78,7 @@ exports.blockAdvertismentUseCase = blockAdvertismentUseCase;
 const getAdvertismentByStatus = async (adminId, status) => {
     const isAdminUser = await (0, admin_repo_1.isAdmin)(adminId);
     if (!isAdminUser) {
-        throw new Error('Only admins can  acces the  advertisement buystatuses');
+        throw new Error("Only admins can  acces the  advertisement buystatuses");
     }
     await advertisment_schema_1.default.find({
         status: status,
@@ -91,20 +91,40 @@ const searchProductsUseCase = async ({ productName, categoryName, searchText, })
         inventoryDetails: types_1.E_INVENTORY_STATUS.AVAILABLE,
     };
     if (productName) {
-        query.productName = { $regex: productName, $options: 'i' }; // Case-insensitive search
+        query.productName = { $regex: productName, $options: "i" }; // Case-insensitive search
     }
     if (categoryName) {
-        query.categoryName = { $regex: categoryName, $options: 'i' };
+        query.categoryName = { $regex: categoryName, $options: "i" };
     }
     if (searchText) {
-        const regex = new RegExp(searchText, 'i');
+        const regex = new RegExp(searchText, "i");
         query.$or = [
             { productName: { $regex: regex } },
             { categoryName: { $regex: regex } },
             { productDescription: { $regex: regex } },
         ];
     }
-    return await advertisment_schema_1.default.find(query);
+    const results = await advertisment_schema_1.default.aggregate([
+        { $match: query },
+        {
+            $lookup: {
+                from: "users",
+                foreignField: "userId",
+                localField: "createdBy",
+                as: "userDetails",
+            },
+        },
+        {
+            $unwind: "$userDetails",
+        },
+        {
+            $project: {
+                "userDetails.password": 0,
+                "userDetails.userId": 0,
+            },
+        },
+    ]);
+    return results;
 };
 exports.searchProductsUseCase = searchProductsUseCase;
 const getAdvertismentByIdUsecase = async (id) => {
