@@ -3,13 +3,13 @@ import {
   CreateUserDocument,
   FilteredUserDocument,
   UpdateUserProfileDocument,
-} from '@/types';
-import { loginResponseDocument } from '@/types/auth.type';
-import { ErrorResponses, SuccessResponseType } from '@/types/response.type';
-import { FastifySchema } from 'fastify';
+} from "@/types";
+import { loginResponseDocument } from "@/types/auth.type";
+import { ErrorResponses, SuccessResponseType } from "@/types/response.type";
+import { FastifySchema } from "fastify";
 
 export const createUserRequestSchema = {
-  tags: ['auth'],
+  tags: ["auth"],
   body: CreateUserDocument,
   response: {
     ...ErrorResponses,
@@ -18,7 +18,7 @@ export const createUserRequestSchema = {
 } satisfies FastifySchema;
 
 export const updateUserProfile = {
-  tags: ['user'],
+  tags: ["user"],
   security: [{ bearerAuth: [] }],
   body: UpdateUserProfileDocument,
   response: {
@@ -28,10 +28,19 @@ export const updateUserProfile = {
 } satisfies FastifySchema;
 
 export const getUserProfile = {
-  tags: ['user'],
+  tags: ["user"],
   security: [{ bearerAuth: [] }],
   response: {
     ...ErrorResponses,
     200: SuccessResponseType(FilteredUserDocument),
   },
 } satisfies FastifySchema;
+
+export const deleteUserProfile = {
+  tags: ["user"],
+  security: [{ bearerAuth: [] }],
+  response: {
+    ...ErrorResponses,
+    200: SuccessResponseType(),
+  },
+};

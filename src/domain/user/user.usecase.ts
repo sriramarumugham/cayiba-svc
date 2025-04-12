@@ -1,16 +1,16 @@
-import AdminModel from '@/data-access/models/admin.schema';
-import ReferredUserModel from '@/data-access/models/referreduser.schema';
-import UserModel from '@/data-access/models/user.schema';
-import { CreateUserType, UpdateUserProfileType } from '@/types';
-import { loginRequestType } from '@/types/auth.type';
-import { signToken } from '@/utils/auth.util';
-import { comparePassword, hashPassword } from '@/utils/bycrypt.util';
+import AdminModel from "@/data-access/models/admin.schema";
+import ReferredUserModel from "@/data-access/models/referreduser.schema";
+import UserModel from "@/data-access/models/user.schema";
+import { CreateUserType, UpdateUserProfileType } from "@/types";
+import { loginRequestType } from "@/types/auth.type";
+import { signToken } from "@/utils/auth.util";
+import { comparePassword, hashPassword } from "@/utils/bycrypt.util";
 
 export const creatUserUseCase = async (body: CreateUserType) => {
   const { email, password, referralCode } = body;
   const existingUser = await UserModel.findOne({ email });
   // TODO throw new custom erros
-  if (existingUser) throw new Error('Email already in use');
+  if (existingUser) throw new Error("Email already in use");
   const hashedPassword = await hashPassword(password);
   const newUser = await UserModel.create({
     email,
@@ -21,7 +21,7 @@ export const creatUserUseCase = async (body: CreateUserType) => {
       referralCode: referralCode,
     });
     if (!referralCode) {
-      throw new Error('Invalid referral code!');
+      throw new Error("Invalid referral code!");
     }
     await ReferredUserModel.create({
       userId: newUser.userId,
@@ -38,12 +38,12 @@ export const loginUserUseCase = async (body: loginRequestType) => {
 
   const user = await UserModel.findOne({ email });
   if (!user) {
-    throw new Error('Invalid email or password');
+    throw new Error("Invalid email or password");
   }
 
   const isValidPassword = await comparePassword(password, user.password);
   if (!isValidPassword) {
-    throw new Error('Invalid email or password');
+    throw new Error("Invalid email or password");
   }
 
   const token = signToken(user.userId);
@@ -53,16 +53,20 @@ export const loginUserUseCase = async (body: loginRequestType) => {
 
 export const updateUserProfileUseCase = async (
   userId: string,
-  updateData: UpdateUserProfileType,
+  updateData: UpdateUserProfileType
 ) => {
   try {
-    const updatedUser = await UserModel.updateOne({ userId: userId }, {$set:updateData}, {
-      new: true,
-      omitUndefined: true,
-    });
+    const updatedUser = await UserModel.updateOne(
+      { userId: userId },
+      { $set: updateData },
+      {
+        new: true,
+        omitUndefined: true,
+      }
+    );
 
     if (!updatedUser) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
     return updatedUser;
@@ -71,6 +75,16 @@ export const updateUserProfileUseCase = async (
   }
 };
 
-export const getUerById = async (userId: string) => { 
-  return await UserModel.findOne({userId:userId}).lean();
-}
+export const getUerById = async (userId: string) => {
+  return await UserModel.findOne({ userId: userId }).lean();
+};
+
+export const deleteUserProfileUseCase = async (userId: string) => {
+  const deleted = await UserModel.deleteOne({ userId });
+
+  if (deleted.deletedCount === 0) {
+    throw new Error("User not found");
+  }
+
+  return;
+};

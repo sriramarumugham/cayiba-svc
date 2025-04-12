@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUerById = exports.updateUserProfileUseCase = exports.loginUserUseCase = exports.creatUserUseCase = void 0;
+exports.deleteUserProfileUseCase = exports.getUerById = exports.updateUserProfileUseCase = exports.loginUserUseCase = exports.creatUserUseCase = void 0;
 const admin_schema_1 = __importDefault(require("../../data-access/models/admin.schema"));
 const referreduser_schema_1 = __importDefault(require("../../data-access/models/referreduser.schema"));
 const user_schema_1 = __importDefault(require("../../data-access/models/user.schema"));
@@ -14,7 +14,7 @@ const creatUserUseCase = async (body) => {
     const existingUser = await user_schema_1.default.findOne({ email });
     // TODO throw new custom erros
     if (existingUser)
-        throw new Error('Email already in use');
+        throw new Error("Email already in use");
     const hashedPassword = await (0, bycrypt_util_1.hashPassword)(password);
     const newUser = await user_schema_1.default.create({
         email,
@@ -25,7 +25,7 @@ const creatUserUseCase = async (body) => {
             referralCode: referralCode,
         });
         if (!referralCode) {
-            throw new Error('Invalid referral code!');
+            throw new Error("Invalid referral code!");
         }
         await referreduser_schema_1.default.create({
             userId: newUser.userId,
@@ -41,11 +41,11 @@ const loginUserUseCase = async (body) => {
     const { email, password } = body;
     const user = await user_schema_1.default.findOne({ email });
     if (!user) {
-        throw new Error('Invalid email or password');
+        throw new Error("Invalid email or password");
     }
     const isValidPassword = await (0, bycrypt_util_1.comparePassword)(password, user.password);
     if (!isValidPassword) {
-        throw new Error('Invalid email or password');
+        throw new Error("Invalid email or password");
     }
     const token = (0, auth_util_1.signToken)(user.userId);
     return token;
@@ -58,7 +58,7 @@ const updateUserProfileUseCase = async (userId, updateData) => {
             omitUndefined: true,
         });
         if (!updatedUser) {
-            throw new Error('User not found');
+            throw new Error("User not found");
         }
         return updatedUser;
     }
@@ -71,3 +71,11 @@ const getUerById = async (userId) => {
     return await user_schema_1.default.findOne({ userId: userId }).lean();
 };
 exports.getUerById = getUerById;
+const deleteUserProfileUseCase = async (userId) => {
+    const deleted = await user_schema_1.default.deleteOne({ userId });
+    if (deleted.deletedCount === 0) {
+        throw new Error("User not found");
+    }
+    return;
+};
+exports.deleteUserProfileUseCase = deleteUserProfileUseCase;

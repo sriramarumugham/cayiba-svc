@@ -1,24 +1,32 @@
-import { getUserProfile, updateUserProfile } from '@/domain/user/user.request.schema';
-import { getUerById, updateUserProfileUseCase } from '@/domain/user/user.usecase';
-import { UpdateUserProfileType } from '@/types';
-import { getUserIdFromRequestHeader } from '@/utils/auth.util';
-import { createErrorResponse, createSuccessResponse } from '@/utils/response';
-import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
+import {
+  deleteUserProfile,
+  getUserProfile,
+  updateUserProfile,
+} from "@/domain/user/user.request.schema";
+import {
+  deleteUserProfileUseCase,
+  getUerById,
+  updateUserProfileUseCase,
+} from "@/domain/user/user.usecase";
+import { UpdateUserProfileType } from "@/types";
+import { getUserIdFromRequestHeader } from "@/utils/auth.util";
+import { createErrorResponse, createSuccessResponse } from "@/utils/response";
+import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 
 const UserRoutes: FastifyPluginAsync = async (fastify) => {
   fastify
     .withTypeProvider<TypeBoxTypeProvider>() // Ensure this is correctly applied
     .patch(
-      '',
+      "",
       {
-        schema: updateUserProfile
+        schema: updateUserProfile,
       },
       async (
         req: FastifyRequest<{
           Body: UpdateUserProfileType;
         }>,
-        res: FastifyReply,
+        res: FastifyReply
       ) => {
         try {
           const user = getUserIdFromRequestHeader(req);
@@ -26,44 +34,58 @@ const UserRoutes: FastifyPluginAsync = async (fastify) => {
 
           const updatedUser = await updateUserProfileUseCase(
             user.userId,
-            updateData,
+            updateData
           );
 
-          createSuccessResponse(
-            res,
-            'User profile updated successfully!',
-          );
+          createSuccessResponse(res, "User profile updated successfully!");
         } catch (error: any) {
-          const message = error.message || 'An unexpected error occurred';
+          const message = error.message || "An unexpected error occurred";
           const statusCode = error.status || 500;
           createErrorResponse(res, message, statusCode);
         }
-      },
-    ).get(
-      '',
+      }
+    )
+    .get(
+      "",
       {
-        schema: getUserProfile
+        schema: getUserProfile,
       },
-      async (
-        req: FastifyRequest,
-        res: FastifyReply,
-      ) => {
+      async (req: FastifyRequest, res: FastifyReply) => {
         try {
           const user = getUserIdFromRequestHeader(req);
 
-          const userDetails = await getUerById(user.userId,);
+          const userDetails = await getUerById(user.userId);
 
           createSuccessResponse(
             res,
-            'User profile fetched successfully!',
-            userDetails,
+            "User profile fetched successfully!",
+            userDetails
           );
         } catch (error: any) {
-          const message = error.message || 'An unexpected error occurred';
+          const message = error.message || "An unexpected error occurred";
           const statusCode = error.status || 500;
           createErrorResponse(res, message, statusCode);
         }
+      }
+    )
+    .delete(
+      "",
+      {
+        schema: deleteUserProfile,
       },
+      async (req: FastifyRequest, res: FastifyReply) => {
+        try {
+          const user = getUserIdFromRequestHeader(req);
+
+          await deleteUserProfileUseCase(user.userId);
+
+          createSuccessResponse(res, "User deleted successfully!");
+        } catch (error: any) {
+          const message = error.message || "An unexpected error occurred";
+          const statusCode = error.status || 500;
+          createErrorResponse(res, message, statusCode);
+        }
+      }
     );
 };
 export default UserRoutes;

@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserProfile = exports.updateUserProfile = exports.createUserRequestSchema = void 0;
+exports.deleteUserProfile = exports.getUserProfile = exports.updateUserProfile = exports.createUserRequestSchema = void 0;
 const types_1 = require("../../types");
 const auth_type_1 = require("../../types/auth.type");
 const response_type_1 = require("../../types/response.type");
 exports.createUserRequestSchema = {
-    tags: ['auth'],
+    tags: ["auth"],
     body: types_1.CreateUserDocument,
     response: {
         ...response_type_1.ErrorResponses,
@@ -13,7 +13,7 @@ exports.createUserRequestSchema = {
     },
 };
 exports.updateUserProfile = {
-    tags: ['user'],
+    tags: ["user"],
     security: [{ bearerAuth: [] }],
     body: types_1.UpdateUserProfileDocument,
     response: {
@@ -22,10 +22,18 @@ exports.updateUserProfile = {
     },
 };
 exports.getUserProfile = {
-    tags: ['user'],
+    tags: ["user"],
     security: [{ bearerAuth: [] }],
     response: {
         ...response_type_1.ErrorResponses,
         200: (0, response_type_1.SuccessResponseType)(types_1.FilteredUserDocument),
+    },
+};
+exports.deleteUserProfile = {
+    tags: ["user"],
+    security: [{ bearerAuth: [] }],
+    response: {
+        ...response_type_1.ErrorResponses,
+        200: (0, response_type_1.SuccessResponseType)(),
     },
 };
