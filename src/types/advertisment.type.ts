@@ -31,7 +31,26 @@ export const AdvertismentType = Type.Object({
   status: Type.Enum(E_STATUS),
   inventoryDetails: Type.Enum(E_INVENTORY_STATUS),
   productDetails: Type.Optional(Type.Any()),
+  createdAt: Type.Optional(Type.String()),
+  updatedAt: Type.Optional(Type.String()),
 });
+
+export const UserBasicDetailsType = Type.Partial(
+  Type.Pick(UserType, ["fullName", "phoneNumber", "countryCode", "email"])
+);
+
+export type UserBasicDetails = Static<typeof UserBasicDetailsType>;
+
+export const AdvertisementWithUserTypeAlt = Type.Composite([
+  AdvertismentType,
+  Type.Object({
+    uploadedBy: Type.Optional(UserBasicDetailsType),
+  }),
+]);
+
+export type AdvertisementWithUserAlt = Static<
+  typeof AdvertisementWithUserTypeAlt
+>;
 
 export type AdvertismentDocument = Static<typeof AdvertismentType>;
 

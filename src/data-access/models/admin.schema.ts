@@ -1,6 +1,7 @@
-import { AdminType, E_ROLE } from '@/types';
-import { getUUID } from '@/utils/uuid.util';
-import mongoose, { Schema } from 'mongoose';
+import { AdminType, E_ROLE } from "@/types";
+import { getUUID } from "@/utils/uuid.util";
+import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const AdminSchema: Schema<AdminType> = new Schema(
   {
@@ -19,8 +20,20 @@ const AdminSchema: Schema<AdminType> = new Schema(
     createdBy: { type: String, default: null },
     referralCode: { type: String, default: null },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-const AdminModel = mongoose.model<AdminType>('Admin', AdminSchema);
+AdminSchema.plugin(mongooseAggregatePaginate);
+
+interface AdminModelType extends mongoose.Model<AdminType> {
+  aggregatePaginate: (
+    aggregate: mongoose.Aggregate<any>,
+    options: any
+  ) => Promise<any>;
+}
+
+const AdminModel = mongoose.model<AdminType, AdminModelType>(
+  "Admin",
+  AdminSchema
+);
 export default AdminModel;

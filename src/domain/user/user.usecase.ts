@@ -2,7 +2,7 @@ import AdminModel from "@/data-access/models/admin.schema";
 import ReferredUserModel from "@/data-access/models/referreduser.schema";
 import UserModel from "@/data-access/models/user.schema";
 import { CreateUserType, UpdateUserProfileType } from "@/types";
-import { loginRequestType } from "@/types/auth.type";
+import { loginRequestType, LoginResponseType } from "@/types/auth.type";
 import { signToken } from "@/utils/auth.util";
 import { comparePassword, hashPassword } from "@/utils/bycrypt.util";
 
@@ -33,7 +33,9 @@ export const creatUserUseCase = async (body: CreateUserType) => {
   }
 };
 
-export const loginUserUseCase = async (body: loginRequestType) => {
+export const loginUserUseCase = async (
+  body: loginRequestType
+): Promise<LoginResponseType> => {
   const { email, password } = body;
 
   const user = await UserModel.findOne({ email });
@@ -47,8 +49,7 @@ export const loginUserUseCase = async (body: loginRequestType) => {
   }
 
   const token = signToken(user.userId);
-
-  return token;
+  return { token, email: user?.email, fullName: user?.fullName, id: user?.id };
 };
 
 export const updateUserProfileUseCase = async (
