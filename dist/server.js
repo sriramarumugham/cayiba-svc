@@ -77,23 +77,29 @@ const port = parseInt(process.env.PORT || "4000", 10);
 console.log("PORT:", port);
 const start = async () => {
     try {
-        // await server.register(cors, {
-        //   origin: (origin, cb) => {
-        //     // Allow undefined (like Postman or SSR) and localhost:5173 (vite default)
-        //     if (!origin || origin === "http://localhost:5173") {
-        //       cb(null, true);
-        //     } else {
-        //       cb(new Error("Not allowed"), false);
-        //     }
-        //   },
-        //   credentials: true,
-        // });
         await server.register(cors_1.default, {
-            origin: ["*"],
-            allowedHeaders: "*",
+            origin: (origin, cb) => {
+                // Allow undefined (like Postman or SSR), localhost:5173 (vite default), and your frontend domain
+                if (!origin ||
+                    origin === "http://localhost:5173" ||
+                    origin ===
+                        "http://yscws8csk4k8swwss8swkc88.145.223.18.190.sslip.io" ||
+                    origin.includes("145.223.18.190") ||
+                    origin.includes("sslip.io")) {
+                    cb(null, true);
+                }
+                else {
+                    console.log("CORS blocked origin:", origin);
+                    cb(new Error("Not allowed"), false);
+                }
+            },
+            credentials: true,
+            methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+            allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
         });
         await server.listen({ port: port, host: "0.0.0.0" });
         console.log(`Server is running at http://localhost:${port}`);
+        console.log(`API base URL: http://localhost:${port}/cayiba/api/v1`);
     }
     catch (err) {
         console.error(err);

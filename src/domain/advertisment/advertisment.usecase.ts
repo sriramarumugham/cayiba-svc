@@ -153,7 +153,7 @@ export const getAdvertismentByStatus = async (
 
   const paginationOptions = createPaginationOptions(options);
 
-  console.log("PAGINATION_OPTOINS", JSON.stringify(pipeline, null, 2));
+  // console.log("PAGINATION_OPTOINS", JSON.stringify(pipeline, null, 2));
   const result = await AdvertismentModel.aggregatePaginate(
     AdvertismentModel.aggregate(pipeline),
     paginationOptions

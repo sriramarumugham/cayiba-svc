@@ -97,7 +97,7 @@ const getAdvertismentByStatus = async (adminId, status, options) => {
         ...(0, paginate_1.buildSortPipeline)(sortBy, sortOrder),
     ];
     const paginationOptions = (0, paginate_1.createPaginationOptions)(options);
-    console.log("PAGINATION_OPTOINS", JSON.stringify(pipeline, null, 2));
+    // console.log("PAGINATION_OPTOINS", JSON.stringify(pipeline, null, 2));
     const result = await advertisment_schema_1.default.aggregatePaginate(advertisment_schema_1.default.aggregate(pipeline), paginationOptions);
     return {
         docs: result.docs,
