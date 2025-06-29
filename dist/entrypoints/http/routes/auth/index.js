@@ -25,7 +25,8 @@ const AuthRoutes = async (fastify) => {
         .post("/user/login", { schema: auth_request_schema_1.loginSchema }, async (req, res) => {
         try {
             const loginResponse = await (0, user_usecase_1.loginUserUseCase)(req.body);
-            (0, response_1.createSuccessResponse)(res, "Login successful", { loginResponse }, 200);
+            console.log("LOGIN_RESPONSE", loginResponse);
+            (0, response_1.createSuccessResponse)(res, "Login successful", { ...loginResponse }, 200);
         }
         catch (error) {
             const message = error.message || "An unexpected error occurred";

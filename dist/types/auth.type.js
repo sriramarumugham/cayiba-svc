@@ -7,8 +7,8 @@ exports.loginRequestDocument = typebox_1.Type.Object({
     password: typebox_1.Type.String(),
 });
 exports.loginResponseDocument = typebox_1.Type.Object({
-    token: typebox_1.Type.String(),
-    email: typebox_1.Type.String(),
-    fullName: typebox_1.Type.String(),
-    id: typebox_1.Type.String(),
+    token: typebox_1.Type.Optional(typebox_1.Type.String()),
+    email: typebox_1.Type.Optional(typebox_1.Type.String()),
+    fullName: typebox_1.Type.Optional(typebox_1.Type.String()),
+    id: typebox_1.Type.Optional(typebox_1.Type.String()),
 });
