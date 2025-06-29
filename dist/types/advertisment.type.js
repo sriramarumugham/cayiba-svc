@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SearchProductType = exports.AdvertismentTypeRequestType = exports.searchRequestDocument = exports.UpdateInventoryDocument = exports.CreateAdvertismentRequestDocument = exports.AdvertismentType = exports.E_INVENTORY_STATUS = exports.E_STATUS = void 0;
+exports.SearchProductType = exports.AdvertismentTypeRequestType = exports.searchRequestDocument = exports.UpdateInventoryDocument = exports.CreateAdvertismentRequestDocument = exports.AdvertisementWithUserTypeAlt = exports.UserBasicDetailsType = exports.AdvertismentType = exports.E_INVENTORY_STATUS = exports.E_STATUS = void 0;
 const typebox_1 = require("@sinclair/typebox");
 const user_type_1 = require("./user.type");
 var E_STATUS;
@@ -33,7 +33,16 @@ exports.AdvertismentType = typebox_1.Type.Object({
     status: typebox_1.Type.Enum(E_STATUS),
     inventoryDetails: typebox_1.Type.Enum(E_INVENTORY_STATUS),
     productDetails: typebox_1.Type.Optional(typebox_1.Type.Any()),
+    createdAt: typebox_1.Type.Optional(typebox_1.Type.String()),
+    updatedAt: typebox_1.Type.Optional(typebox_1.Type.String()),
 });
+exports.UserBasicDetailsType = typebox_1.Type.Partial(typebox_1.Type.Pick(user_type_1.UserType, ["fullName", "phoneNumber", "countryCode", "email"]));
+exports.AdvertisementWithUserTypeAlt = typebox_1.Type.Composite([
+    exports.AdvertismentType,
+    typebox_1.Type.Object({
+        uploadedBy: typebox_1.Type.Optional(exports.UserBasicDetailsType),
+    }),
+]);
 exports.CreateAdvertismentRequestDocument = typebox_1.Type.Omit(exports.AdvertismentType, [
     "advertismentId",
     "views",

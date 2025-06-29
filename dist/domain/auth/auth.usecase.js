@@ -8,12 +8,17 @@ const response_1 = require("../../utils/response");
 const loginUseCase = async (body, res) => {
     const admin = await (0, admin_repo_1.getAdminByEmailRepo)(body?.email);
     if (!admin)
-        return (0, response_1.createErrorResponse)(res, 'Invalid credentials', 401);
+        return (0, response_1.createErrorResponse)(res, "Invalid credentials", 401);
     const isPasswordValid = await (0, bycrypt_util_1.comparePassword)(body?.password, admin.password);
     if (!isPasswordValid) {
-        return (0, response_1.createErrorResponse)(res, 'Invalid credentials', 401);
+        return (0, response_1.createErrorResponse)(res, "Invalid credentials", 401);
     }
     const token = (0, auth_util_1.signToken)(admin.adminId);
-    return token;
+    return {
+        email: admin?.email,
+        token: token,
+        id: admin?.adminId,
+        fullName: admin?.fullName,
+    };
 };
 exports.loginUseCase = loginUseCase;

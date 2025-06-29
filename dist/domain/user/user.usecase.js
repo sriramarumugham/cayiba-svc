@@ -48,7 +48,7 @@ const loginUserUseCase = async (body) => {
         throw new Error("Invalid email or password");
     }
     const token = (0, auth_util_1.signToken)(user.userId);
-    return token;
+    return { token, email: user?.email, fullName: user?.fullName, id: user?.id };
 };
 exports.loginUserUseCase = loginUserUseCase;
 const updateUserProfileUseCase = async (userId, updateData) => {

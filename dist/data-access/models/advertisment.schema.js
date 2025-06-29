@@ -32,10 +32,14 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const uuid_util_1 = require("../../utils/uuid.util");
 const mongoose_1 = __importStar(require("mongoose"));
 const types_1 = require("../../types");
+const mongoose_aggregate_paginate_v2_1 = __importDefault(require("mongoose-aggregate-paginate-v2"));
 const AdvertismentSchema = new mongoose_1.Schema({
     advertismentId: { type: String, rquired: true, default: uuid_util_1.getUUID },
     productName: { type: String, required: true },
@@ -59,5 +63,6 @@ const AdvertismentSchema = new mongoose_1.Schema({
     },
     productDetails: { type: mongoose_1.Schema.Types.Mixed, required: false },
 }, { timestamps: true });
-const AdvertismentModel = mongoose_1.default.model('Advertisment', AdvertismentSchema);
+AdvertismentSchema.plugin(mongoose_aggregate_paginate_v2_1.default);
+const AdvertismentModel = mongoose_1.default.model("Advertisment", AdvertismentSchema);
 exports.default = AdvertismentModel;

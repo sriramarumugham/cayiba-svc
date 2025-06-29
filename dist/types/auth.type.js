@@ -8,4 +8,7 @@ exports.loginRequestDocument = typebox_1.Type.Object({
 });
 exports.loginResponseDocument = typebox_1.Type.Object({
     token: typebox_1.Type.String(),
+    email: typebox_1.Type.String(),
+    fullName: typebox_1.Type.String(),
+    id: typebox_1.Type.String(),
 });

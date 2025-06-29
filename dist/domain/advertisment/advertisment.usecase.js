@@ -8,6 +8,7 @@ const admin_repo_1 = require("../../data-access/admin.repo");
 const advertisment_schema_1 = __importDefault(require("../../data-access/models/advertisment.schema"));
 const user_schema_1 = __importDefault(require("../../data-access/models/user.schema"));
 const types_1 = require("../../types");
+const paginate_1 = require("../../utils/paginate");
 const createAdvertismentUseCase = async (body, userId) => {
     const user = await user_schema_1.default.findOne({ userId });
     if (!user) {
@@ -70,19 +71,46 @@ const blockAdvertismentUseCase = async (adminId, advertismentId) => {
     if (!isAdminUser) {
         throw new Error("Only admins can update advertisement statuses");
     }
-    await advertisment_schema_1.default.findByIdAndUpdate(advertismentId, {
-        status: types_1.E_STATUS.BLOCKED,
-    });
+    await advertisment_schema_1.default.findOneAndUpdate({ advertismentId }, { status: types_1.E_STATUS.BLOCKED }, { new: true });
 };
 exports.blockAdvertismentUseCase = blockAdvertismentUseCase;
-const getAdvertismentByStatus = async (adminId, status) => {
+const getAdvertismentByStatus = async (adminId, status, options) => {
     const isAdminUser = await (0, admin_repo_1.isAdmin)(adminId);
     if (!isAdminUser) {
         throw new Error("Only admins can  acces the  advertisement buystatuses");
     }
-    await advertisment_schema_1.default.find({
-        status: status,
-    });
+    const { search, sortBy = "createdAt", sortOrder = "desc" } = options;
+    const pipeline = [
+        // Base filter for status
+        // { $match: { status: status } },
+        // Add search functionality if needed (optional)
+        ...(search || status
+            ? (0, paginate_1.buildSearchPipeline)([
+                "productDescription",
+                "productName",
+                "categoryName",
+                "subcategoryName",
+            ], // Add relevant searchable fields
+            search, { status: status })
+            : []),
+        // Add sorting
+        ...(0, paginate_1.buildSortPipeline)(sortBy, sortOrder),
+    ];
+    const paginationOptions = (0, paginate_1.createPaginationOptions)(options);
+    console.log("PAGINATION_OPTOINS", JSON.stringify(pipeline, null, 2));
+    const result = await advertisment_schema_1.default.aggregatePaginate(advertisment_schema_1.default.aggregate(pipeline), paginationOptions);
+    return {
+        docs: result.docs,
+        totalDocs: result.totalDocs,
+        limit: result.limit,
+        totalPages: result.totalPages,
+        page: result.page,
+        pagingCounter: result.pagingCounter,
+        hasPrevPage: result.hasPrevPage,
+        hasNextPage: result.hasNextPage,
+        prevPage: result.prevPage,
+        nextPage: result.nextPage,
+    };
 };
 exports.getAdvertismentByStatus = getAdvertismentByStatus;
 const searchProductsUseCase = async ({ productName, categoryName, searchText, }) => {
@@ -128,10 +156,45 @@ const searchProductsUseCase = async ({ productName, categoryName, searchText, })
 };
 exports.searchProductsUseCase = searchProductsUseCase;
 const getAdvertismentByIdUsecase = async (id) => {
-    return await advertisment_schema_1.default.findOne({
-        advertismentId: id,
-        status: types_1.E_STATUS.ACTIVE,
-    });
+    const ad = await advertisment_schema_1.default.aggregate([
+        {
+            $match: {
+                advertismentId: id,
+            },
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "createdBy",
+                foreignField: "userId",
+                as: "uploadedBy",
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            phoneNumber: 1,
+                            countryCode: 1,
+                            email: 1,
+                            _id: 0,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $unwind: {
+                path: "$uploadedBy",
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $sort: { createdAt: -1 },
+        },
+    ]);
+    if (!ad.length) {
+        throw new Error("Product not found!");
+    }
+    return ad[0];
 };
 exports.getAdvertismentByIdUsecase = getAdvertismentByIdUsecase;
 const incrementViewsUseCase = (advertismentId) => advertisment_schema_1.default.findOneAndUpdate({ advertismentId }, { $inc: { views: 1 } });

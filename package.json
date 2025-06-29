@@ -51,6 +51,8 @@
     "fastify": "^5.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.3",
+    "mongoose-aggregate-paginate-v2": "^1.1.4",
+    "mongoose-paginate-v2": "^1.9.1",
     "stream-to-buffer": "^0.1.0",
     "uuid": "^11.0.3"
   }

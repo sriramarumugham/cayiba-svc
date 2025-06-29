@@ -1,61 +1,66 @@
 "use strict";
+// ========================================
+// Reusable Pagination Utility Functions
+// ========================================
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.paginate = void 0;
-var paginate = (schema) => {
-    schema.static('paginate', async function (filter, options) {
-        let sort = '';
-        if (options.sortBy) {
-            const sortingCriteria = [];
-            options.sortBy.split(',').forEach((sortOption) => {
-                const [key, order] = sortOption.split(':');
-                sortingCriteria.push((order === 'desc' ? '-' : '') + key);
-            });
-            sort = sortingCriteria.join(' ');
-        }
-        else {
-            sort = 'createdAt';
-        }
-        let project = '';
-        if (options.projectBy) {
-            const projectionCriteria = [];
-            options.projectBy.split(',').forEach((projectOption) => {
-                const [key, include] = projectOption.split(':');
-                projectionCriteria.push((include === 'hide' ? '-' : '') + key);
-            });
-            project = projectionCriteria.join(' ');
-        }
-        const limit = options.limit && parseInt(options.limit.toString(), 10) > 0
-            ? parseInt(options.limit.toString(), 10)
-            : 10;
-        const page = options.page && parseInt(options.page.toString(), 10) > 0
-            ? parseInt(options.page.toString(), 10)
-            : 1;
-        const skip = (page - 1) * limit;
-        const countPromise = this?.countDocuments(filter).exec();
-        let aggregate = this?.aggregate();
-        aggregate = aggregate.match(filter);
-        aggregate = aggregate.sort(sort);
-        aggregate = aggregate.skip(skip);
-        aggregate = aggregate.limit(limit);
-        if (project)
-            aggregate = aggregate.project(project);
-        if (options?.lookup?.length > 0) {
-            options.lookup?.map((lookupOptions) => (aggregate = aggregate.lookup(lookupOptions)));
-        }
-        // Execute the aggregate pipeline
-        const docsPromise = aggregate.exec();
-        return Promise.all([countPromise, docsPromise]).then((values) => {
-            const [totalResults, results] = values;
-            const totalPages = Math.ceil(totalResults / limit);
-            const result = {
-                results,
-                page,
-                limit,
-                totalPages,
-                totalResults,
-            };
-            return Promise.resolve(result);
-        });
-    });
+exports.createPaginationOptions = exports.getPaginationOptions = exports.buildSortPipeline = exports.buildSearchPipeline = void 0;
+const buildSearchPipeline = (searchFields, searchTerm, defaultMatch) => {
+    if (!searchTerm?.trim()) {
+        return defaultMatch ? [{ $match: defaultMatch }] : [];
+    }
+    const searchMatch = {
+        $or: searchFields.map((field) => ({
+            [field]: { $regex: searchTerm, $options: "i" },
+        })),
+    };
+    // wrap both in $and if defaultMatch exists
+    const combinedMatch = defaultMatch
+        ? { $and: [defaultMatch, searchMatch] }
+        : searchMatch;
+    return [{ $match: combinedMatch }];
 };
-exports.paginate = paginate;
+exports.buildSearchPipeline = buildSearchPipeline;
+const buildSortPipeline = (sortBy = "createdAt", sortOrder = "desc") => {
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+    if (!sortBy) {
+        sortBy = "createdAt";
+    }
+    return [
+        {
+            $sort: {
+                [sortBy]: sortDirection,
+            },
+        },
+    ];
+};
+exports.buildSortPipeline = buildSortPipeline;
+const getPaginationOptions = (req) => {
+    const query = req.query;
+    return {
+        page: query.page ?? 1,
+        limit: query.limit ?? 10,
+        search: query.search ?? undefined,
+        sortBy: query.sortBy ?? "createdAt",
+        sortOrder: query.sortOrder ?? "desc",
+    };
+};
+exports.getPaginationOptions = getPaginationOptions;
+const createPaginationOptions = (options) => {
+    return {
+        page: Math.max(1, options.page || 1),
+        limit: Math.min(100, Math.max(1, options.limit || 10)),
+        customLabels: {
+            totalDocs: "totalDocs",
+            docs: "docs",
+            limit: "limit",
+            page: "page",
+            nextPage: "nextPage",
+            prevPage: "prevPage",
+            totalPages: "totalPages",
+            pagingCounter: "pagingCounter",
+            hasPrevPage: "hasPrevPage",
+            hasNextPage: "hasNextPage",
+        },
+    };
+};
+exports.createPaginationOptions = createPaginationOptions;

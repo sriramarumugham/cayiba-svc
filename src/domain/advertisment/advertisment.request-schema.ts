@@ -3,12 +3,16 @@ import { ErrorResponses, SuccessResponseType } from "@/types/response.type";
 import { Type } from "@sinclair/typebox";
 import { FastifySchema } from "fastify";
 import {
-  E_STATUS,
+  AdvertisementWithUserTypeAlt,
   SearchProductType,
   searchRequestDocument,
   UpdateInventoryDocument,
 } from "../../types/advertisment.type";
 import { generateSchemaDescription } from "@/utils/helpers";
+import {
+  PaginatedResponseSchema,
+  PaginationQuerySchema,
+} from "@/types/pagination.type";
 
 export const createAdvertismentRequestSchema = {
   tags: ["advertisment"],
@@ -32,12 +36,16 @@ export const updateAdvertismentInverntorySchema = {
 
 export const getAdvertismentByStatusSchema = {
   tags: ["advertisment"],
-  querystring: Type.Object({
-    status: Type.Enum(E_STATUS), // Add valid advertisement statuses
-  }),
+  security: [{ bearerAuth: [] }],
+  querystring: Type.Intersect([
+    PaginationQuerySchema,
+    Type.Object({
+      status: Type.String(), // Add valid advertisement statuses
+    }),
+  ]),
   response: {
     ...ErrorResponses,
-    200: SuccessResponseType(Type.Array(AdvertismentType)),
+    200: SuccessResponseType(PaginatedResponseSchema(AdvertismentType)),
   },
 } satisfies FastifySchema;
 
@@ -86,6 +94,6 @@ export const getAdvertismentByIdRequestSchema = {
   params: Type.Object({ id: Type.String() }),
   response: {
     ...ErrorResponses,
-    200: SuccessResponseType(AdvertismentType),
+    200: SuccessResponseType(AdvertisementWithUserTypeAlt),
   },
 } satisfies FastifySchema;
