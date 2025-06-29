@@ -8,9 +8,9 @@ export const loginRequestDocument = Type.Object({
 export type loginRequestType = Static<typeof loginRequestDocument>;
 
 export const loginResponseDocument = Type.Object({
-  token: Type.String(),
-  email: Type.String(),
-  fullName: Type.String(),
-  id: Type.String(),
+  token: Type.Optional(Type.String()),
+  email: Type.Optional(Type.String()),
+  fullName: Type.Optional(Type.String()),
+  id: Type.Optional(Type.String()),
 });
 export type LoginResponseType = Static<typeof loginResponseDocument>;

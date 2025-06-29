@@ -73,29 +73,24 @@ void server.setErrorHandler(async (error, request, reply) => {
     return reply.status(statusCode).send(response);
 });
 void server.register(app_1.default);
-const port = parseInt(process.env.PORT || "4000", 10);
+const port = parseInt(process.env.PORT || "4400", 10);
 console.log("PORT:", port);
 const start = async () => {
     try {
         await server.register(cors_1.default, {
-            origin: (origin, cb) => {
-                // Allow undefined (like Postman or SSR), localhost:5173 (vite default), and your frontend domain
-                if (!origin ||
-                    origin === "http://localhost:5173" ||
-                    origin ===
-                        "http://yscws8csk4k8swwss8swkc88.145.223.18.190.sslip.io" ||
-                    origin.includes("145.223.18.190") ||
-                    origin.includes("sslip.io")) {
-                    cb(null, true);
-                }
-                else {
-                    console.log("CORS blocked origin:", origin);
-                    cb(new Error("Not allowed"), false);
-                }
-            },
+            origin: true,
             credentials: true,
             methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-            allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+            allowedHeaders: [
+                "Content-Type",
+                "Authorization",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+            ],
+            exposedHeaders: ["Content-Type", "Authorization"],
+            preflightContinue: false,
+            optionsSuccessStatus: 204,
         });
         await server.listen({ port: port, host: "0.0.0.0" });
         console.log(`Server is running at http://localhost:${port}`);
