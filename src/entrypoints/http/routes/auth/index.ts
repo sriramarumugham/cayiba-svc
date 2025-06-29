@@ -51,10 +51,12 @@ const AuthRoutes: FastifyPluginAsync = async (fastify) => {
       ) => {
         try {
           const loginResponse = await loginUserUseCase(req.body);
+
+          console.log("LOGIN_RESPONSE", loginResponse);
           createSuccessResponse(
             res,
             "Login successful",
-            { loginResponse },
+            { ...loginResponse },
             200
           );
         } catch (error: any) {
