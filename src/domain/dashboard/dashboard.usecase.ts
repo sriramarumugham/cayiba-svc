@@ -92,10 +92,6 @@ export const getDashboardGraphUseCase = async (
       startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   }
 
-  console.log(
-    `Graph API - Period: ${period}, Start Date: ${startDate.toISOString()}, End Date: ${now.toISOString()}`
-  );
-
   // Aggregate pipeline to get daily counts
   const pipeline: PipelineStage[] = [
     {
@@ -126,11 +122,9 @@ export const getDashboardGraphUseCase = async (
     },
   ];
 
-  console.log("Graph API - Pipeline:", JSON.stringify(pipeline, null, 2));
-
   try {
     const result = await AdvertismentModel.aggregate(pipeline);
-    console.log("Graph API - Raw result:", JSON.stringify(result, null, 2));
+    // console.log("Graph API - Raw result:", JSON.stringify(result, null, 2));
 
     // Fill in missing dates with zero counts
     const data: GraphDataPoint[] = [];
@@ -148,7 +142,7 @@ export const getDashboardGraphUseCase = async (
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    console.log(`Graph API - Final data points: ${data.length}`);
+    // console.log(`Graph API - Final data points: ${data.length}`);
     return { data };
   } catch (error: any) {
     console.error("Graph API - Error in aggregation:", error);

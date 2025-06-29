@@ -71,7 +71,7 @@ const AdminRoutes: FastifyPluginAsync = async (fastify) => {
     .get("/sub-admin", { schema: getSubadminListSchema }, async (req, res) => {
       try {
         const paginationOptions = getPaginationOptions(req);
-        console.log("paginationOptions", paginationOptions);
+        // console.log("paginationOptions", paginationOptions);
 
         const subadmins = await getSubadminListUseCase(paginationOptions);
         createSuccessResponse(res, "Subadmin List!", subadmins, 200);

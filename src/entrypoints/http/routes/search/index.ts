@@ -66,7 +66,7 @@ const SearchRoute: FastifyPluginAsync = async (fastify) => {
 
           const advertisment = await getAdvertismentByIdUsecase(id);
 
-          console.log("advertisment_", advertisment);
+          // console.log("advertisment_", advertisment);
 
           if (!advertisment) {
             return createErrorResponse(
