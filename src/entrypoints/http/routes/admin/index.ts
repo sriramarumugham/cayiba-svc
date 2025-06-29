@@ -13,6 +13,14 @@ import {
   getSubadminListUseCase,
 } from "../../../../domain/admin/admin.usecase";
 import {
+  getDashboardStatsSchema,
+  getDashboardGraphSchema,
+} from "../../../../domain/dashboard/dashboard.request-schema";
+import {
+  getDashboardStatsUseCase,
+  getDashboardGraphUseCase,
+} from "../../../../domain/dashboard/dashboard.usecase";
+import {
   createErrorResponse,
   createSuccessResponse,
 } from "../../../../utils/response";
@@ -72,7 +80,38 @@ const AdminRoutes: FastifyPluginAsync = async (fastify) => {
         const statusCode = error.status || 500;
         createErrorResponse(res, message, statusCode);
       }
-    });
+    })
+    .get(
+      "/dashboard/stats",
+      { schema: getDashboardStatsSchema },
+      async (req, res) => {
+        try {
+          const { userId } = getUserIdFromRequestHeader(req);
+          const stats = await getDashboardStatsUseCase(userId);
+          createSuccessResponse(res, "Dashboard Statistics!", stats, 200);
+        } catch (error: any) {
+          const message = error.message || "An unexpected error occurred";
+          const statusCode = error.status || 500;
+          createErrorResponse(res, message, statusCode);
+        }
+      }
+    )
+    .get(
+      "/dashboard/graph",
+      { schema: getDashboardGraphSchema },
+      async (req, res) => {
+        try {
+          const { userId } = getUserIdFromRequestHeader(req);
+          const { period } = req.query as { period?: string };
+          const graphData = await getDashboardGraphUseCase(userId, period);
+          createSuccessResponse(res, "Dashboard Graph Data!", graphData, 200);
+        } catch (error: any) {
+          const message = error.message || "An unexpected error occurred";
+          const statusCode = error.status || 500;
+          createErrorResponse(res, message, statusCode);
+        }
+      }
+    );
 };
 
 export default AdminRoutes;

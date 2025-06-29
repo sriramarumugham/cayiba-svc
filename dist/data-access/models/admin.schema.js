@@ -32,10 +32,14 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const types_1 = require("../../types");
 const uuid_util_1 = require("../../utils/uuid.util");
 const mongoose_1 = __importStar(require("mongoose"));
+const mongoose_aggregate_paginate_v2_1 = __importDefault(require("mongoose-aggregate-paginate-v2"));
 const AdminSchema = new mongoose_1.Schema({
     adminId: {
         type: String,
@@ -52,5 +56,6 @@ const AdminSchema = new mongoose_1.Schema({
     createdBy: { type: String, default: null },
     referralCode: { type: String, default: null },
 }, { timestamps: true });
-const AdminModel = mongoose_1.default.model('Admin', AdminSchema);
+AdminSchema.plugin(mongoose_aggregate_paginate_v2_1.default);
+const AdminModel = mongoose_1.default.model("Admin", AdminSchema);
 exports.default = AdminModel;

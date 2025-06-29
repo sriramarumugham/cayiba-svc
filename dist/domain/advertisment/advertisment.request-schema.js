@@ -6,6 +6,7 @@ const response_type_1 = require("../../types/response.type");
 const typebox_1 = require("@sinclair/typebox");
 const advertisment_type_1 = require("../../types/advertisment.type");
 const helpers_1 = require("../../utils/helpers");
+const pagination_type_1 = require("../../types/pagination.type");
 exports.createAdvertismentRequestSchema = {
     tags: ["advertisment"],
     response: {
@@ -24,12 +25,16 @@ exports.updateAdvertismentInverntorySchema = {
 };
 exports.getAdvertismentByStatusSchema = {
     tags: ["advertisment"],
-    querystring: typebox_1.Type.Object({
-        status: typebox_1.Type.Enum(advertisment_type_1.E_STATUS), // Add valid advertisement statuses
-    }),
+    security: [{ bearerAuth: [] }],
+    querystring: typebox_1.Type.Intersect([
+        pagination_type_1.PaginationQuerySchema,
+        typebox_1.Type.Object({
+            status: typebox_1.Type.String(), // Add valid advertisement statuses
+        }),
+    ]),
     response: {
         ...response_type_1.ErrorResponses,
-        200: (0, response_type_1.SuccessResponseType)(typebox_1.Type.Array(types_1.AdvertismentType)),
+        200: (0, response_type_1.SuccessResponseType)((0, pagination_type_1.PaginatedResponseSchema)(types_1.AdvertismentType)),
     },
 };
 exports.blockAdvertismentSchema = {
@@ -73,6 +78,6 @@ exports.getAdvertismentByIdRequestSchema = {
     params: typebox_1.Type.Object({ id: typebox_1.Type.String() }),
     response: {
         ...response_type_1.ErrorResponses,
-        200: (0, response_type_1.SuccessResponseType)(types_1.AdvertismentType),
+        200: (0, response_type_1.SuccessResponseType)(advertisment_type_1.AdvertisementWithUserTypeAlt),
     },
 };
