@@ -45,6 +45,8 @@ const AdvertismentRoutes: FastifyPluginAsync = async (fastify) => {
 
           const body = req.body as unknown as any;
 
+          console.log("FILE_BODY", body?.file ? true : false);
+
           let preparedFiles: CustomFile[] = [];
           try {
             const files = Array.isArray(body?.file) ? body.file : [body?.file];
@@ -79,7 +81,7 @@ const AdvertismentRoutes: FastifyPluginAsync = async (fastify) => {
           }
 
           let uploadedFilesUrls = [""];
-
+          console.log("PREPARED_FILE_LENGTH", preparedFiles.length);
           try {
             if (preparedFiles.length > 0) {
               uploadedFilesUrls = await s3BulkUpload(preparedFiles);

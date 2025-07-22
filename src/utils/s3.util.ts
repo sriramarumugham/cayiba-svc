@@ -6,21 +6,17 @@ export type CustomFile = {
   file: NodeJS.ReadableStream;
 };
 
-
-
 const s3 = new AWS.S3({
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`, // Cloudflare R2 Endpoint
+  endpoint: process.env.R2_PUBLIC_URL, // Cloudflare R2 Endpoint
   accessKeyId: process.env.R2_ACCESS_KEY_ID,
   secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  signatureVersion: 'v4',
+  s3ForcePathStyle: true,
 });
-
-
 
 const s3Upload = async (
   filename: string,
   fileContent: any,
-  meta?: { mimeType?: string },
+  meta?: { mimeType?: string }
 ): Promise<string> => {
   const filePath = `uploads/${Date.now()}_${filename}`; // Change file path
   const params: any = {
@@ -31,7 +27,10 @@ const s3Upload = async (
 
   // Determine file content type
   const { mimeType } = meta || {};
-  params.ContentType = mimeType && !mimeType.includes("stream") ? mimeType : "application/octet-stream";
+  params.ContentType =
+    mimeType && !mimeType.includes("stream")
+      ? mimeType
+      : "application/octet-stream";
   params.ContentDisposition = `inline; filename="${filename}"`;
 
   return new Promise((resolve, reject) => {
@@ -41,7 +40,7 @@ const s3Upload = async (
           reject(err);
         }
         // Construct public URL using R2.dev or S3 API URL
-        const fileUrl = `${process.env.R2_PUBLIC_URL}/${filePath}`;
+        const fileUrl = `${process.env.R2_PUBLIC_URL}/${process.env.R2_BUCKET_NAME}/${filePath}`;
         resolve(fileUrl);
       });
     } catch (err) {
@@ -50,7 +49,6 @@ const s3Upload = async (
     }
   });
 };
-
 
 const s3BulkUpload = async (files: CustomFile[]): Promise<string[]> => {
   const uploadPromises = files.map((file) =>
