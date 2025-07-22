@@ -18,6 +18,7 @@ const AdvertismentRoutes = async (fastify) => {
         try {
             const MAX_FILE_SIZE = 2 * 1024 * 1024;
             const body = req.body;
+            console.log("FILE_BODY", body?.file ? true : false);
             let preparedFiles = [];
             try {
                 const files = Array.isArray(body?.file) ? body.file : [body?.file];
@@ -44,6 +45,7 @@ const AdvertismentRoutes = async (fastify) => {
                 console.log("FileProcessingError", error);
             }
             let uploadedFilesUrls = [""];
+            console.log("PREPARED_FILE_LENGTH", preparedFiles.length);
             try {
                 if (preparedFiles.length > 0) {
                     uploadedFilesUrls = await (0, s3_util_1.s3BulkUpload)(preparedFiles);
