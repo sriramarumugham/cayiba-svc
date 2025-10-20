@@ -7,7 +7,7 @@ exports.getUserIdFromRequestHeader = exports.verifyToken = exports.signToken = v
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const signToken = (userId) => {
     const token = jsonwebtoken_1.default.sign({ userId: userId }, process.env.SECRET_KEY, {
-        expiresIn: '24h',
+        expiresIn: "365d",
     });
     return token;
 };
@@ -18,16 +18,16 @@ const verifyToken = (token) => {
         return decoded;
     }
     catch (error) {
-        throw new Error('Invalid token');
+        throw new Error("Invalid token");
     }
 };
 exports.verifyToken = verifyToken;
 const getUserIdFromRequestHeader = (req) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-        throw new Error('Authorization header missing');
+        throw new Error("Authorization header missing");
     }
-    const token = authHeader?.split(' ')[1] ?? authHeader?.split(' ')[0];
+    const token = authHeader?.split(" ")[1] ?? authHeader?.split(" ")[0];
     const decodedToken = (0, exports.verifyToken)(token);
     return decodedToken;
 };
